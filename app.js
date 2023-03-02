@@ -18,12 +18,15 @@ var InitDemo = function () {
     alert('Your browser does not support WebGL')
   }
 
+
+
   // If I wanted to adjust the size of the canvas at this point I could by saying:
   /* canvas.width = window.innerWidth;
     canvas.height = window.innerHeight; */
   // If we do any dynamic size adjustments also be sure to say this:
   /* gl.viewport(0, 0, window.innerWidth, window.innerHeight) */
   // The above code just changes what OpenGL thinks that it's rendering to
+
 
 
   // Now lets clear our OpenGL context to a flat color
@@ -34,4 +37,10 @@ var InitDemo = function () {
   // The color buffer is the one that actually stores what color all the pixels should be
   // The depth buffer stores how deep into the screen that pixel was, so it's really good for Z ordering
   // EX: Let's say you have a circle and a square, and the circle is behind the square. The depth buffer, when it draws a pixel from the square, might put a value lower than the value of the circle, which means that it's closer to the screen. So if the program goes to draw a pixel from the circle and it notices that that pixel from the square is already there it will just throw it away and ignore it because the depth buffer already had a value that supersedes what was attempted to be drawn
+
+
+
+  // Now what we need to do in order to get the triangle going we have to set up the entire graphics pipeline program in order to get this to work
+  // We're going to need a vertex shader and a fragment shader
+  // With a vertex shader what you do is you take in input parameters called attributes and if you're writing a C function 
 };
