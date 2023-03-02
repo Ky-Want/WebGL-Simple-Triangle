@@ -1,0 +1,29 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebGL - Simple Triangle</title>
+</head>
+
+
+
+<body onload="InitDemo()">
+  <canvas id="game-surface" width="800" height="600">
+    <!-- If this error shows up you're using too old of a browser that you probably shouldn't be using -->
+    Your browser does not support HTML5
+  </canvas>
+
+  <br>
+
+  <!-- This will just let us know where the canvas begins and where it ends before we actually start drawing things -->
+  <i>The demo is right above this text</i>
+
+  <!-- The reason this is being put in the body and not the head tag is because JavaScript is immediately loaded as soon as the browser sees it and it's immediately executed -->
+  <!-- I'm going to be having to deal with the canvas, so I want the JavaScript to be loaded after the canvas element is if possible -->
+  <!-- If it were put in the head we wouldn't be guaranteed which one would run first -->
+  <script src="app.js"></script>
+</body>
+
+</html>
