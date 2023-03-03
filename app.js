@@ -1,4 +1,4 @@
-var vertexShaderText =
+let vertexShaderText =
   [
     'precision mediump float;', //this says I want to use medium precision on the floating point variables. This has something to do with the arithmetic/the comparisons. Lower precision means less accuracy but also faster.
     '',
@@ -7,22 +7,38 @@ var vertexShaderText =
     'void main()',
     '{',
     // So what the code below is doing is it's saying a vec4 expects 4 numbers. Attribute vec2... has 2, so we're going to take the first two from it and then the third one and fourth one from the piece below
-    '   gl_Position = vec4(vertPosition, 0.0, 1.0)', //here all I'm going to do is say that the position equals vector 4 because GL position is a four dimensional vector
+    '   gl_Position = vec4(vertPosition, 0.0, 1.0);', //here all I'm going to do is say that the position equals vector 4 because GL position is a four dimensional vector
     // Alpha is ALWAYS 1.0
     '}'
   ].join('\n'); //this is I have an array, and inside the array I'm going to put the lines of the vertex shader each on their own actual line on the file 
 
 
-var InitDemo = function () {
+
+let fragmentShaderText =
+  [
+    'precision mediump float;',
+    '',
+    'void main()', //this one isn't taking in any additional parameters right now, I just want to color it
+    '{',
+    '  gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);', //this is just going to say the fragment color is going to be one on the red, so completely filled with red, no green, no blue, full on the alpha because it's not transparent.
+    '}'
+  ].join('\n');
+
+// Now I need to get OpenGL ready to use these vertex shader and fragment shader (line 115)
+
+
+
+let InitDemo = function () {
   // This will be what happens when the page is fully loaded and ready to go
-  console.log('This is working') // Always check to make sure it's working
+  // console.log('app.js connected')
+  // Always check to make sure it's working
 
   // STEP 1: initialize WebGL
   // to do that we need two things; first is to get the actual canvas element
-  var canvas = document.getElementById('game-surface')
+  let canvas = document.getElementById('game-surface')
   // Now we need to get the OpenGl context
   // @ts-ignore (it doesn't like getContext, but doesn't seem to be causing any actual issues with the code)
-  var gl = canvas.getContext('webgl');
+  let gl = canvas.getContext('webgl');
 
   if (!gl) {
     console.log('WebGL not supported, falling back on experiment-webgl')
@@ -32,6 +48,7 @@ var InitDemo = function () {
   if (!gl) {
     alert('Your browser does not support WebGL')
   }
+
 
 
 
@@ -93,4 +110,61 @@ var InitDemo = function () {
     gl_FragColor = vec4(fragColor, 1.0); //and the only output from the fragment shader will ever be this GL underscore frag color. In the parenthesis I'm taking the color that it's supposed to be and adding an alpha component
   }
   */
+
+
+
+  // I'll make two variables first
+  let vertexShader = gl.createShader(gl.VERTEX_SHADER); //the way to do this is I use OpenGL to create a new shader object and in the parenthesis I tell it what type of shader I want to use
+  // a lot of these constants are using GL dot something, that's just the way WebGL does it because the OpenGL API uses a ton of these constants, just like gl.VERTEX_SHADER which ends up being a number
+  // I'll do the same for the fragment shader
+  let fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+
+  // Now what I want to do is compile the vertex shader from the code in vertexShaderText up on line 1 and the fragment shader from the fragmentShaderText code right below it. There's two steps to doing that
+  // First I need to set the shader source. I do that through the GL shaders source. The first parameter is the shader that I want to set the the source code for, and the second parameter is the actual source code.
+  gl.shaderSource(vertexShader, vertexShaderText);
+  gl.shaderSource(fragmentShader, fragmentShaderText);
+
+  // Now to actually compile it
+  gl.compileShader(vertexShader);
+  // a way we can check for compilation errors in the shaders is by using a function called GL dot get shader parameter, we need to tell it which shader we're examining and then which parameter we want to be getting
+  if (!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)) {
+    console.error('ERROR compiling vertex shader', gl.getShaderInfoLog(vertexShader));
+    return;
+  }
+
+  gl.compileShader(fragmentShader);
+  if (!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)) {
+    console.error('ERROR compiling fragment shader', gl.getShaderInfoLog(fragmentShader));
+    return;
+  }
+
+
+
+  // So now I have a vertex shader and a fragment shader that I'm already ready to use. Those are the two programs I have to write for the graphics pipeline
+  // Now the last thing that I need to do is combine them. I need to tell OpenGL that these are the two programs that we want to use together and I'll do that by creating what's called a program in OpenGL. You can think of a program in this context as a graphics card/the entire graphics pipeline, whereas a shader is just an individual component
+  var program = gl.createProgram();
+  // then I want to attach both the vertex shader and the fragment shader
+  gl.attachShader(program, vertexShader); //the gl.attachShader function takes in which program you want to attach the shader to and then which shader you actually want to use
+  gl.attachShader(program, fragmentShader);
+
+  // Now we need to link the program together. A good way to remember that is just compile then link, like a C program
+  gl.linkProgram(program); //now, just like how I checked for compile error, I'll also check for linker errors
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+    console.error('ERROR linking program', gl.getProgramInfoLog(program));
+    return;
+  }
+
+  // one final step we can do to catch additional errors is called validating the program. This is something we only want to do in testing because as far as I'm aware it's more expensive. In actual C++ game writing this is something you would only do in the debug releases and not in the full releases because apparently it takes up more time
+  gl.validateProgram(program); //I know it'll catch additional issues, but I don't know what issues those are exactly
+  if (!gl.getProgramParameter(program, gl.VALIDATE_STATUS)) {
+    console.error('ERROR validating program', gl.getProgramInfoLog(program));
+    return;
+  }
+
+
+
+  // Now I need to set the information that the graphics card is going to be using (28:50)
 };
+
+
+
