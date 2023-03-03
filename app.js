@@ -1,3 +1,18 @@
+var vertexShaderText =
+  [
+    'precision mediump float;', //this says I want to use medium precision on the floating point variables. This has something to do with the arithmetic/the comparisons. Lower precision means less accuracy but also faster.
+    '',
+    'attribute vec2 vertPosition;', //the types are going to be a lot different than they are on the C based languages, you do have float (would go right after attribute), like you do in the C based languages, but you also have the vec2, vec3, and vec4. These represent pairs, triplets, and four sets of floats that go together, so a vector of two elements would be like this one. This has an X and a Y component, both floats.
+    '',
+    'void main()',
+    '{',
+    // So what the code below is doing is it's saying a vec4 expects 4 numbers. Attribute vec2... has 2, so we're going to take the first two from it and then the third one and fourth one from the piece below
+    '   gl_Position = vec4(vertPosition, 0.0, 1.0)', //here all I'm going to do is say that the position equals vector 4 because GL position is a four dimensional vector
+    // Alpha is ALWAYS 1.0
+    '}'
+  ].join('\n'); //this is I have an array, and inside the array I'm going to put the lines of the vertex shader each on their own actual line on the file 
+
+
 var InitDemo = function () {
   // This will be what happens when the page is fully loaded and ready to go
   console.log('This is working') // Always check to make sure it's working
@@ -42,5 +57,40 @@ var InitDemo = function () {
 
   // Now what we need to do in order to get the triangle going we have to set up the entire graphics pipeline program in order to get this to work
   // We're going to need a vertex shader and a fragment shader
-  // With a vertex shader what you do is you take in input parameters called attributes and if you're writing a C function 
+  // With a vertex shader what you do is you take in input parameters called attributes and if you're writing a C function the attributes would be parameters like this in JavaScript: 
+  // function vertexShader(vertPosition, vertColor) {
+  //   return {
+  //     fragColor: vertColor,
+  //     gl_Position: [vertPosition.x, vertPosition.y, 0.0, 1.0]
+  //   }
+  // };
+
+
+  // And this is what it would look like the GL shader language (GLSL):
+  /*
+  precision mediump float;
+  attribute vec2 vertPosition; //attributes are input parameters
+  attribute vec3 vertColor;
+  varying vec3 fragColor; //varying are output parameters
+
+  //void main is the actual vertex shader that performs all the operations
+  void main()
+  {
+    //here I'm just setting the fragment color to whatever the vertex color happens to be
+    fragColor = vertColor;
+    //with every vertex shader there's a special variable that you set called GL underscore position. This sets where on the actual rendering surface you want to draw that vertex. It then goes through the rasterizer and for every single pixel that comes out of that rasterizer state you draw with a fragment shader, which looks like the piece of code below this example
+    gl_Position = vec4(vertPosition, 0.0, 1.0);
+  }
+  */
+
+
+  /*
+  precision mediump float;
+  varying vex3 fragColor; //here the varying are now the inputs for the fragment shader
+
+  void main()
+  {
+    gl_FragColor = vec4(fragColor, 1.0); //and the only output from the fragment shader will ever be this GL underscore frag color. In the parenthesis I'm taking the color that it's supposed to be and adding an alpha component
+  }
+  */
 };
