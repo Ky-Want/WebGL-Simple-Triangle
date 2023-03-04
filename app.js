@@ -30,7 +30,7 @@ let fragmentShaderText =
 
 let InitDemo = function () {
   // This will be what happens when the page is fully loaded and ready to go
-  // console.log('app.js connected')
+  console.log('app.js connected')
   // Always check to make sure it's working
 
   // STEP 1: initialize WebGL
