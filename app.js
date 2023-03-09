@@ -177,11 +177,11 @@ let InitDemo = function () {
   // So we need to create a list of those x and y positions that's going to define our triangle. After that we need to attach that list to the graphics card, or to the vertex shader
   let triangleVertices =
     [ //x and y   R, G, B
-      0.0, 0.5, 1.0, 1.0, 0.0, // first is right in the middle on the x-axis, and it's going to be 3/4 of the way up the screen on the y-axis
+      0.0, 0.5, 1.5, 1.3, 0.6, // first is right in the middle on the x-axis, and it's going to be 3/4 of the way up the screen on the y-axis
 
-      - 0.5, -0.5, 0.7, 0.0, 1.0, // next, we're going left to make sure that we keep going w/ the counterclockwise order
+      -0.5, -0.5, 0.7, 0.3, 1.0, // next, we're going left to make sure that we keep going w/ the counterclockwise order
 
-      0.5, -0.5, 0.1, 1.0, 0.6
+      0.5, -0.5, 0.1, 1.0, 0.8
     ];
 
   // So this --^  right now is sitting on our main computer ramps, so it's sitting on our CPU accessible memory. The graphics card has no notion of what that is, the vertex shader has no notion.
