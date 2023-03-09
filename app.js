@@ -3,9 +3,17 @@ let vertexShaderText =
     'precision mediump float;', //this says I want to use medium precision on the floating point variables. This has something to do with the arithmetic/the comparisons. Lower precision means less accuracy but also faster.
     '',
     'attribute vec2 vertPosition;', //the types are going to be a lot different than they are on the C based languages, you do have float (would go right after attribute), like you do in the C based languages, but you also have the vec2, vec3, and vec4. These represent pairs, triplets, and four sets of floats that go together, so a vector of two elements would be like this one. This has an X and a Y component, both floats.
+
+    'attribute vec3 vertColor;',
+    'varying vec3 fragColor;',
+
+    // 'uniform float screenWidth;', 
+    // uniforms are constants that stay the same between the vertex shader and the fragment shader
+
     '',
     'void main()',
     '{',
+    '    fragColor = vertColor;',
     // So what the code below is doing is it's saying a vec4 expects 4 numbers. Attribute vec2... has 2, so we're going to take the first two from it and then the third one and fourth one from the piece below
     '   gl_Position = vec4(vertPosition, 0.0, 1.0);', //here all I'm going to do is say that the position equals vector 4 because GL position is a four dimensional vector
     // Alpha is ALWAYS 1.0
@@ -18,9 +26,10 @@ let fragmentShaderText =
   [
     'precision mediump float;',
     '',
+    'varying vec3 fragColor;',
     'void main()', //this one isn't taking in any additional parameters right now, I just want to color it
     '{',
-    '  gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);', //this is just going to say the fragment color is going to be one on the red, so completely filled with red, no green, no blue, full on the alpha because it's not transparent.
+    '  gl_FragColor = vec4(fragColor, 1.0);', //this is just going to say the fragment color is going to be one on the red, so completely filled with red, no green, no blue, full on the alpha because it's not transparent.
     '}'
   ].join('\n');
 
@@ -167,12 +176,12 @@ let InitDemo = function () {
   // So back to the triangle, it has three points and each point is going to have an x and y position. We're not dealing with color right now, so that's just two points of data, and we know that from the fragment shader. We have one attribute, and that attribute is a vector two. 
   // So we need to create a list of those x and y positions that's going to define our triangle. After that we need to attach that list to the graphics card, or to the vertex shader
   let triangleVertices =
-    [ // x and y is the info we're expecting
-      0.0, 0.5, // first is right in the middle on the x-axis, and it's going to be 3/4 of the way up the screen on the y-axis
+    [ //x and y   R, G, B
+      0.0, 0.5, 1.0, 1.0, 0.0, // first is right in the middle on the x-axis, and it's going to be 3/4 of the way up the screen on the y-axis
 
-      -0.5, -0.5, // next, we're going left to make sure that we keep going w/ the counterclockwise order
+      - 0.5, -0.5, 0.7, 0.0, 1.0, // next, we're going left to make sure that we keep going w/ the counterclockwise order
 
-      0.5, -0.5
+      0.5, -0.5, 0.1, 1.0, 0.6
     ];
 
   // So this --^  right now is sitting on our main computer ramps, so it's sitting on our CPU accessible memory. The graphics card has no notion of what that is, the vertex shader has no notion.
@@ -190,7 +199,11 @@ let InitDemo = function () {
 
   // So now that we've sent the information over to the graphics card we now need to inform the vertex shader the vertPosition is the vertexes in triangleVertices, or rather every pair of the vertexes, because right now all it's doing is sitting there as six points, (0.0, 0.5), (-0.5, -0.5), and (0.5, -0.5), but there's no rhyme or reason to that.
   // The way we do this is we need to get a handle to that attribute
-  let positionAttribLocation = gl.getAtrribLocation(program, 'vertPosition') //we specify 2 parameters here, which program we're using, and the program will then specify which vertex shader we're using, and then what the name of the attribute that we're using is, and that's just vertPosition
+  var positionAttribLocation = gl.getAttribLocation(program, 'vertPosition'); //we specify 2 parameters here, which program we're using, and the program will then specify which vertex shader we're using, and then what the name of the attribute that we're using is, and that's just vertPosition
+
+  var colorAttribLocation = gl.getAttribLocation(program, 'vertColor'); //We don't have to do anything for the varying with this because by the time we get to the varying properties we're already done with the vertex shader. We only have to specify the inputs to the vertex shader because the inputs to the fragment shader, the CPU, isn't involved at all.
+
+
 
   // Now to specify the layout of that attribute
   gl.vertexAttribPointer(
@@ -198,9 +211,49 @@ let InitDemo = function () {
     2, // Number of elements in each attribute (this one's a vec2, so 2)
     gl.FLOAT, // Type of each of those
     gl.FALSE, // Whether or not the data is normalized
-    2 * Float32Array.BYTES_PER_ELEMENT, // Size on an individual vertex
-    // Offset from the beginning of a single vertex to this attribute
+    5 * Float32Array.BYTES_PER_ELEMENT, // Size on an individual vertex
+    0 // Offset from the beginning of a single vertex to this attribute
   );
+
+  gl.vertexAttribPointer(
+    colorAttribLocation,
+    3,
+    gl.FLOAT,
+    gl.FALSE,
+    5 * Float32Array.BYTES_PER_ELEMENT,
+    2 * Float32Array.BYTES_PER_ELEMENT
+  );
+
+
+
+  gl.enableVertexAttribArray(positionAttribLocation); // enables the attribute for use
+  gl.enableVertexAttribArray(colorAttribLocation);
+
+
+
+  // Main render loop goes here
+  // In a game this would be maybe a while loop where you write something like an updateWorld(), renderWorld() function or something like that
+  // The more JavaScript way to do it would be something like...
+  /*
+    let loop = function(){
+      updateWorld();
+      renderWorld();
+      if(running){
+        requestAnimationFrame(loop);
+      }
+    }
+    requestAnimationFrame(loop);
+  */
+
+  // That would be the more JS-like way of doing things. For this we're just going to draw the triangle out to the screen because we're not doing any actual animation
+
+  // So first we need to specify which program we want to use
+  gl.useProgram(program); // Since this is the only one we have so far it's the only one that really makes sense
+
+  gl.drawArrays(gl.TRIANGLES, 0, 3); // This function will take three parameters, and this is going to use whichever buffer happens to be actively bound
+  // The first parameter is going to say we're going to draw in triangles. 99% of the time you draw something it's going to be GL dot triangles. The other options are like GL dot points, lines, line segments, triangle fans, etc. And those do individual things that I'm not going to make note of here.
+  // The second parameter is how many of these vertexes we're going to skip. In this case I want to skip zero
+  // The third one is how many vertices we want to have to actually draw, which is three. We're drawing three to form a complete triangle. If we add more points in triangleVertices, for example if we wanted to draw it twice, putting in three more points, we would have to change the number of vertices we want to draw to 6
 };
 
 
