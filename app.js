@@ -163,7 +163,44 @@ let InitDemo = function () {
 
 
 
-  // Now I need to set the information that the graphics card is going to be using (28:50)
+  // Now I need to set the information that the graphics card is going to be using
+  // So back to the triangle, it has three points and each point is going to have an x and y position. We're not dealing with color right now, so that's just two points of data, and we know that from the fragment shader. We have one attribute, and that attribute is a vector two. 
+  // So we need to create a list of those x and y positions that's going to define our triangle. After that we need to attach that list to the graphics card, or to the vertex shader
+  let triangleVertices =
+    [ // x and y is the info we're expecting
+      0.0, 0.5, // first is right in the middle on the x-axis, and it's going to be 3/4 of the way up the screen on the y-axis
+
+      -0.5, -0.5, // next, we're going left to make sure that we keep going w/ the counterclockwise order
+
+      0.5, -0.5
+    ];
+
+  // So this --^  right now is sitting on our main computer ramps, so it's sitting on our CPU accessible memory. The graphics card has no notion of what that is, the vertex shader has no notion.
+  // What you use for graphics card programs is Buffers. What that is, is just a chunk of memory that's allocated for some purpose
+  let triangleVertexBufferObject = gl.createBuffer(); // now this is a chunk of memory on the GPU that we're ready to use
+  gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexBufferObject); // What this line is saying is that the active buffer, we're using it as an array buffer, which you can think of that as just being variables that we're passing to the graphics card. Nothing too special, just vertex buffers do that.
+  // Also we are binding the buffer that we just created to be the active buffer 
+
+  // After that we want to specify the data on the active buffer
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(triangleVertices), gl.STATIC_DRAW); // now what these three parameters mean is that this is the type of buffer we're talking about, an Array Buffer (notice that this actual variable is not called in the gl dot buffer data: reason being, it's going to use whatever active buffer is there, so whichever one that we last bound)
+  // In the second parameter we're specifying that we want to use the points listed in triangleVertices (it would be fine as just triangleVertices without the Float 32 Array in languages like C and C++). The way JS stores things is everything is a 64-bit floating-point precision number, but OpenGL is expecting it in 32-bits, so we need to add a wonderful object called the float 32 array, which specifies the type and makes sure that it's correct for the OpenGL calls
+  // Then the third parameter (gl.STATIC_DRAW) just means we're sending the info from the CPU memory to the GPU memory once, and that we're not going to change it ever again. It's just going over then we're done with it.
+
+
+
+  // So now that we've sent the information over to the graphics card we now need to inform the vertex shader the vertPosition is the vertexes in triangleVertices, or rather every pair of the vertexes, because right now all it's doing is sitting there as six points, (0.0, 0.5), (-0.5, -0.5), and (0.5, -0.5), but there's no rhyme or reason to that.
+  // The way we do this is we need to get a handle to that attribute
+  let positionAttribLocation = gl.getAtrribLocation(program, 'vertPosition') //we specify 2 parameters here, which program we're using, and the program will then specify which vertex shader we're using, and then what the name of the attribute that we're using is, and that's just vertPosition
+
+  // Now to specify the layout of that attribute
+  gl.vertexAttribPointer(
+    positionAttribLocation, // Attribute location
+    2, // Number of elements in each attribute (this one's a vec2, so 2)
+    gl.FLOAT, // Type of each of those
+    gl.FALSE, // Whether or not the data is normalized
+    2 * Float32Array.BYTES_PER_ELEMENT, // Size on an individual vertex
+    // Offset from the beginning of a single vertex to this attribute
+  );
 };
 
 
